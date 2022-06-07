@@ -19,21 +19,21 @@ case class Book(words: List[String]) {
   //This is much faster than the method above, but the question asks us to use the collections api, which this doesn't really.
   def topNWordsPriorityQueue(n: Int): List[String] = {
     val queue = collection.mutable.PriorityQueue[(String, Int)]()(Ordering.by[(String, Int), Int](_._2))
-    val wordOccurrences = words.groupBy(identity).view.mapValues(_.length).toSet
-
-    wordOccurrences.foreach { word =>
-      val sanitized = sanitize(word._1)
-      if(sanitized.nonEmpty && !common.contains(sanitized.get)) queue.enqueue((sanitized.get, word._2))
-    }
+    words
+      .groupBy(identity)
+      .view
+      .mapValues(_.length)
+      .toSet
+      .foreach { word: (String, Int) =>
+        val sanitized = sanitize(word._1)
+        if (sanitized.nonEmpty && !common.contains(sanitized.get)) queue.enqueue((sanitized.get, word._2))
+      }
     queue.dequeueAll.take(n).map(_._1).toList
   }
 
-  private def sanitize(word: String): Option[String] =
-    """\b\p{L}+(?:-\p{L}+)*\b""".r.findAllIn(word.toLowerCase).toList.headOption
+  private def sanitize(word: String): Option[String] = """\b\p{L}+(?:-\p{L}+)*\b""".r.findAllIn(word.toLowerCase).toList.headOption
 }
 
 object Book {
-  def apply(words: String): Book = {
-    Book(words.split("\\s+").toList)
-  }
+  def apply(words: String): Book = Book(words.split("\\s+").toList)
 }
